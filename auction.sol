@@ -3,7 +3,7 @@
  */
 
 // SPDX-License-Identifier: MIT 
-pragma solidity 0.8.9;
+pragma solidity 0.8 .9;
 
 interface IERC165 {
 	/**
@@ -393,7 +393,7 @@ library Address {
 
 		uint256 size;
 		assembly {
-			size := extcodesize(account)
+			size:= extcodesize(account)
 		}
 		return size > 0;
 	}
@@ -572,7 +572,7 @@ library Address {
 				// The easiest way to bubble the revert reason is using memory via assembly
 
 				assembly {
-					let returndata_size := mload(returndata)
+					let returndata_size:= mload(returndata)
 					revert(add(32, returndata), returndata_size)
 				}
 			} else {
@@ -1984,7 +1984,7 @@ library ECDSA {
 			// ecrecover takes the signature parameters, and the only way to get them
 			// currently is to use assembly.
 			assembly {
-				r:= mload(add(signature, 0x20))
+				r:=  mload(add(signature, 0x20))
 				s:= mload(add(signature, 0x40))
 				v:= byte(0, mload(add(signature, 0x60)))
 			}
@@ -2577,24 +2577,25 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
 
 
 
-contract NFTAuction is IERC1155Receiver, IERC721Receiver ,  ReentrancyGuard, Ownable {
-  using Counters for Counters.Counter;
-  Counters.Counter public _auctionIds;  // count of auctions listed
-  Counters.Counter private _auctionsSold;// cound of auction sold
-   Counters.Counter private _auctionsInActive;
- address payable treasury; // treaasury to transfer listing price
- address payable _seller;
- address payable _bidder;
- address public tokenAddress;
+contract NFTAuction is IERC1155Receiver, IERC721Receiver, ReentrancyGuard, Ownable {
+	using Counters
+	for Counters.Counter;
+	Counters.Counter public _auctionIds; // count of auctions listed
+	Counters.Counter private _auctionsSold; // cound of auction sold
+	Counters.Counter private _auctionsInActive;
+	address payable treasury; // treaasury to transfer listing price
+	address payable _seller;
+	address payable _bidder;
+	address public tokenAddress;
 	address public weth;
 	uint256 public treasuryRoyaltySeller = 100;
 	uint256 public treasuryRoyaltyBuyer = 100;
 
-  	IUniswapV2Router02 public uniswapV2Router; // uniswap dex router
+	IUniswapV2Router02 public uniswapV2Router; // uniswap dex router
 	IUniswapV2Pair public pairContract; // tgk eth pair contract
 	uint256 public slippage = 10000;
 
- 	constructor(address token, address _treasury, address pair) {
+	constructor(address token, address _treasury, address pair) {
 
 		tokenAddress = token;
 		treasury = payable(_treasury);
@@ -2605,46 +2606,46 @@ contract NFTAuction is IERC1155Receiver, IERC721Receiver ,  ReentrancyGuard, Own
 		uniswapV2Router = _uniswapV2Router;
 	}
 
-  // structure to show details of auction
-   struct Auction {
-       uint256 auctionId;
-        uint256 tokenId;
-        uint256 amount;
-        uint256 duration;
-        uint256 reservePrice;
-        address payable seller;
-        address payable bidder;
-        address sellerCurrency;
+	// structure to show details of auction
+	struct Auction {
+		uint256 auctionId;
+		uint256 tokenId;
+		uint256 amount;
+		uint256 duration;
+		uint256 reservePrice;
+		address payable seller;
+		address payable bidder;
+		address sellerCurrency;
 		address bidderCurrency;
-        address nftContract;
-        bool isActive;
-        bool sold;
-        uint256 startTime;
-        bool is721;
-    }
-  // mapping to fetch auction details using auction id
-  mapping(uint256 => Auction) public idToAuction;
+		address nftContract;
+		bool isActive;
+		bool sold;
+		uint256 startTime;
+		bool is721;
+	}
+	// mapping to fetch auction details using auction id
+	mapping(uint256 => Auction) public idToAuction;
 
-  event AuctionCreated (
-    uint indexed auctionId,
-    address nftContract,
-    uint256 indexed tokenId,
-    address seller,
-    address sellerCurrency,
-    uint256 duration,
-    uint256 startTime,
-    bool isActive,
-    uint256 Reserveprice,
-    bool sold,
-    bool is721
-  );
-  
-  event BidPlaced(uint indexed auctionId, address bidder, uint256 amount);
-  event AuctionEnded(uint indexed auctionId);
-  event AuctionCancelled(uint indexed auctionId);
-  event NftClaimed(uint indexed auctionId);
- 
- function setTreasuryRoyalty(uint256 sellerRoyalty, uint256 buyerRoyalty) external onlyOwner {
+	event AuctionCreated(
+		uint indexed auctionId,
+		address nftContract,
+		uint256 indexed tokenId,
+		address seller,
+		address sellerCurrency,
+		uint256 duration,
+		uint256 startTime,
+		bool isActive,
+		uint256 Reserveprice,
+		bool sold,
+		bool is721
+	);
+
+	event BidPlaced(uint indexed auctionId, address bidder, uint256 amount);
+	event AuctionEnded(uint indexed auctionId);
+	event AuctionCancelled(uint indexed auctionId);
+	event NftClaimed(uint indexed auctionId);
+
+	function setTreasuryRoyalty(uint256 sellerRoyalty, uint256 buyerRoyalty) external onlyOwner {
 		treasuryRoyaltySeller = sellerRoyalty;
 		treasuryRoyaltyBuyer = buyerRoyalty;
 	}
@@ -2657,11 +2658,11 @@ contract NFTAuction is IERC1155Receiver, IERC721Receiver ,  ReentrancyGuard, Own
 		treasury = payable(_treasury);
 	}
 
-      function changeAddress(address token, address _treasury) external onlyOwner{
+	function changeAddress(address token, address _treasury) external onlyOwner {
 
-	  tokenAddress = token;
-	  treasury = payable(_treasury);
-	  }
+		tokenAddress = token;
+		treasury = payable(_treasury);
+	}
 
 	function onERC1155Received(address, address, uint256, uint256, bytes memory) public virtual returns(bytes4) {
 		return this.onERC1155Received.selector;
@@ -2670,15 +2671,15 @@ contract NFTAuction is IERC1155Receiver, IERC721Receiver ,  ReentrancyGuard, Own
 	function onERC1155BatchReceived(address, address, uint256[] memory, uint256[] memory, bytes memory) public virtual returns(bytes4) {
 		return this.onERC1155BatchReceived.selector;
 	}
-  
-  /* Places an auction for sale on the marketplace */
-  function createAuction(
-   address nftContract,
-    uint256 tokenId, address currency,
-    uint256 price, uint256 duration, bool is721Nft
-  ) public nonReentrant {
-    require(nftContract!=address(0),"zero address cannot be an input");
-   require(price > 0, "Price must be at least 1 wei");
+
+	/* Places an auction for sale on the marketplace */
+	function createAuction(
+		address nftContract,
+		uint256 tokenId, address currency,
+		uint256 price, uint256 duration, bool is721Nft
+	) public nonReentrant {
+		require(nftContract != address(0), "zero address cannot be an input");
+		require(price > 0, "Price must be at least 1 wei");
 		if (is721Nft) {
 			require(IERC721(nftContract).isApprovedForAll(msg.sender, address(this)),
 				"Caller must be approved or owner for token id");
@@ -2690,364 +2691,350 @@ contract NFTAuction is IERC1155Receiver, IERC721Receiver ,  ReentrancyGuard, Own
 			require(IERC1155(nftContract).balanceOf(msg.sender, tokenId) > 0, "Balance 0");
 
 		}
-    _auctionIds.increment();
-    uint256 auctionId = _auctionIds.current();
-
-  
-      idToAuction[auctionId] = Auction( {
-         auctionId: auctionId ,
-         tokenId: tokenId ,
-         amount: 0,
-         duration: duration ,
-         reservePrice: price ,
-          seller: payable(msg.sender) ,
-          bidder: payable(address(0)),
-         sellerCurrency: currency,
-		 bidderCurrency: currency ,
-         nftContract: nftContract ,
-         isActive: true,
-         sold: false,
-         startTime: block.timestamp,
-         is721: is721Nft
-    });
-
-  
-    emit AuctionCreated (
-  auctionId,
-  nftContract,
-  tokenId,
-  msg.sender,
-  currency,
-   duration,
-   block.timestamp,
-   true,
-   price,
-   false,
-   is721Nft
-  );
-  }
+		_auctionIds.increment();
+		uint256 auctionId = _auctionIds.current();
 
 
-  
-  function placeBid(
-    uint256 auctionId, uint256 bidAmount, address currency
-    ) public payable isValidId(auctionId) nonReentrant {
-    require( block.timestamp < (idToAuction[auctionId].startTime)+(idToAuction[auctionId].duration) ,"Duartion Exceeded");
-      require(msg.sender!= idToAuction[auctionId].seller,"seller cannot place bid");
-    require( idToAuction[auctionId].isActive == true,"Auction ended");
-    if(idToAuction[auctionId].amount == 0){
-         if(idToAuction[auctionId].bidderCurrency == currency){
-             if(idToAuction[auctionId].bidderCurrency == tokenAddress){
-              require(bidAmount >= idToAuction[auctionId].reservePrice,"Please place a higher bid in order to complete the purchase");
-              IERC20(tokenAddress).transferFrom(msg.sender, address(this),bidAmount);
-              idToAuction[auctionId].bidder =payable( msg.sender);
-              idToAuction[auctionId].amount = bidAmount;
-              emit BidPlaced(auctionId, msg.sender, bidAmount);
-             }
-             else{
-              uint256 buyerFee = (idToAuction[auctionId].reservePrice * treasuryRoyaltyBuyer) / 10000;
-              require(msg.value >= (idToAuction[auctionId].reservePrice)+buyerFee,"Please place a higher bid in order to complete the purchase");
-              uint256 bidderFee = (bidAmount * treasuryRoyaltyBuyer) / 10000;
-              require(msg.value >= (bidAmount)+bidderFee,"Please transfer enough funds");
-              idToAuction[auctionId].bidder =payable( msg.sender);
-              idToAuction[auctionId].amount = bidAmount;
-              if(msg.value > (bidAmount)+bidderFee){
-				  payable(msg.sender).transfer(msg.value - (bidAmount+bidderFee));
-			  }
-              emit BidPlaced(auctionId, msg.sender, bidAmount);
-             }
-         }
-         else{
-             uint256 currentPrice = getPrice(auctionId, currency); 
-             if(idToAuction[auctionId].bidderCurrency == tokenAddress){
-              uint256 buyerFee = (currentPrice * treasuryRoyaltyBuyer) / 10000;
-              require(msg.value >= (currentPrice)+buyerFee,"Please place a higher bid in order to complete the purchase");
-              uint256 bidderFee = (bidAmount * treasuryRoyaltyBuyer) / 10000;
-              require(msg.value >= (bidAmount)+bidderFee,"Please transfer enough funds");
-              idToAuction[auctionId].bidder =payable( msg.sender);
-               idToAuction[auctionId].bidderCurrency = uniswapV2Router.WETH();
-              idToAuction[auctionId].amount = bidAmount;
-              if(msg.value > (bidAmount)+bidderFee){
-				  payable(msg.sender).transfer(msg.value - (bidAmount+bidderFee));
-			  }
-              emit BidPlaced(auctionId, msg.sender, msg.value);
-             }
-             else{
-             
-              require(bidAmount >= currentPrice,"Please place a higher bid in order to complete the purchase");
-              IERC20(tokenAddress).transferFrom(msg.sender, address(this),bidAmount);
-              idToAuction[auctionId].bidder =payable( msg.sender);
-              idToAuction[auctionId].bidderCurrency = tokenAddress;
-              idToAuction[auctionId].amount = bidAmount;
-              emit BidPlaced(auctionId, msg.sender, bidAmount);
-             }
-         }
-    
-    }
-    else{
-        uint256 currentPrice = getPrice(auctionId, currency); 
-         transferFundsToLastBidder(auctionId);
-        if(idToAuction[auctionId].bidderCurrency == currency){
-             if(idToAuction[auctionId].bidderCurrency == tokenAddress){
-              require(bidAmount >= idToAuction[auctionId].amount,"Please place a higher bid in order to complete the purchase");
-              IERC20(tokenAddress).transferFrom(msg.sender, address(this),bidAmount);
-              idToAuction[auctionId].bidder =payable( msg.sender);
-              idToAuction[auctionId].amount = bidAmount;
-              emit BidPlaced(auctionId, msg.sender, bidAmount);
-             }
-             else{
-              uint256 buyerFee = (idToAuction[auctionId].amount * treasuryRoyaltyBuyer) / 10000;
-              require(msg.value >= (idToAuction[auctionId].amount)+buyerFee,"Please place a higher bid in order to complete the purchase");
-              uint256 bidderFee = (bidAmount * treasuryRoyaltyBuyer) / 10000;
-              require(msg.value >= (bidAmount)+bidderFee,"Please transfer enough funds");
-              idToAuction[auctionId].bidder =payable( msg.sender);
-              idToAuction[auctionId].amount = bidAmount;
-              if(msg.value > (bidAmount)+bidderFee){
-				  payable(msg.sender).transfer(msg.value - (bidAmount+bidderFee));
-			  }
-              emit BidPlaced(auctionId, msg.sender, bidAmount);
-             }
-
-        }
-        else{
-        if(idToAuction[auctionId].bidderCurrency == tokenAddress){
-              uint256 buyerFee = (currentPrice * treasuryRoyaltyBuyer) / 10000;
-              require(msg.value >= (currentPrice)+buyerFee,"Please place a higher bid in order to complete the purchase");
-              uint256 bidderFee = (bidAmount * treasuryRoyaltyBuyer) / 10000;
-              require(msg.value >= (bidAmount)+bidderFee,"Please transfer enough funds");
-              idToAuction[auctionId].bidder =payable( msg.sender);
-               idToAuction[auctionId].bidderCurrency = uniswapV2Router.WETH();
-              idToAuction[auctionId].amount = bidAmount;
-              if(msg.value > (bidAmount)+bidderFee){
-				  payable(msg.sender).transfer(msg.value - (bidAmount+bidderFee));
-			  }
-              emit BidPlaced(auctionId, msg.sender, msg.value);
-             }
-             else{
-             
-              require(bidAmount >= currentPrice,"Please place a higher bid in order to complete the purchase");
-              IERC20(tokenAddress).transferFrom(msg.sender, address(this),bidAmount);
-              idToAuction[auctionId].bidder =payable( msg.sender);
-              idToAuction[auctionId].bidderCurrency = tokenAddress;
-              idToAuction[auctionId].amount = bidAmount;
-              emit BidPlaced(auctionId, msg.sender, bidAmount);
-             }
-           
-        }
-   }
-  }
-  //function to end auction
-  
-  function endAuction(uint256 auctionId) public isValidId(auctionId) {
-      require(msg.sender == idToAuction[auctionId].seller || msg.sender == address(this) || msg.sender == idToAuction[auctionId].bidder ,"Caller has no rights");
-      require ((idToAuction[auctionId].startTime)+(idToAuction[auctionId].duration) <= block.timestamp,"Auction is still live");
-      require( idToAuction[auctionId].isActive= true,"Auction is not active");
-       idToAuction[auctionId].isActive= false;
-       
-       if(idToAuction[auctionId].amount==0)
-       {
-           idToAuction[auctionId].sold = false;          
-       }
-       
-       else{
-            idToAuction[auctionId].sold = true;
-            if(idToAuction[auctionId].is721){
-             IERC721(idToAuction[auctionId].nftContract).
-             safeTransferFrom(idToAuction[auctionId].seller, idToAuction[auctionId].bidder , idToAuction[auctionId].tokenId);
-            }
-            else{
-              IERC1155(idToAuction[auctionId].nftContract).safeTransferFrom(idToAuction[auctionId].seller, 
-              idToAuction[auctionId].bidder, idToAuction[auctionId].tokenId, 1, ""); 
-            }
-           
-            transferFunds(auctionId);
-            _auctionsSold.increment();
-        
-       }
-        _auctionsInActive.increment();
-        emit AuctionEnded(auctionId);
-      
-  }
+		idToAuction[auctionId] = Auction({
+			auctionId: auctionId,
+			tokenId: tokenId,
+			amount: 0,
+			duration: duration,
+			reservePrice: price,
+			seller: payable(msg.sender),
+			bidder: payable(address(0)),
+			sellerCurrency: currency,
+			bidderCurrency: currency,
+			nftContract: nftContract,
+			isActive: true,
+			sold: false,
+			startTime: block.timestamp,
+			is721: is721Nft
+		});
 
 
-  function claimNft(uint256 auctionId) public isValidId(auctionId){
-    require ((idToAuction[auctionId].startTime)+(idToAuction[auctionId].duration) <= block.timestamp,"Auction is still live, claim when its over ");
-    require(msg.sender == idToAuction[auctionId].bidder, "Only the highest bidder can call");
-    endAuction(auctionId); 
-    emit NftClaimed(auctionId);
-  }
-  
-  //function to cancel auction 
-  function cancelAuction( uint256 auctionId) external isValidId(auctionId){
-       require(msg.sender == idToAuction[auctionId].seller || msg.sender == address(this),"Caller has no rights");
-       require ((idToAuction[auctionId].startTime)+(idToAuction[auctionId].duration) > block.timestamp,"Auction has already ended, you can't cancel now");
-       require( idToAuction[auctionId].isActive= true,"Auction is not active");
-       idToAuction[auctionId].isActive= false;
-        if(idToAuction[auctionId].amount != 0){
-       transferFundsToLastBidder(auctionId);
-       }
-        idToAuction[auctionId].sold = false;
-            _auctionsInActive.increment();
-        emit AuctionCancelled(auctionId);
-  }
-  
-  /* Returns all unsold market auctions */
-  function fetchUnsoldAuctions() public view returns (Auction[] memory) {
-    uint auctionCount = _auctionIds.current();
-    uint unsoldauctionCount = _auctionIds.current() - _auctionsInActive.current();
-    uint currentIndex = 0;
+		emit AuctionCreated(
+			auctionId,
+			nftContract,
+			tokenId,
+			msg.sender,
+			currency,
+			duration,
+			block.timestamp,
+			true,
+			price,
+			false,
+			is721Nft
+		);
+	}
 
-    Auction[] memory auctions = new Auction[](unsoldauctionCount);
-    for (uint i = 0; i < auctionCount; i++) {
-      if (idToAuction[i+(1)].isActive == true) {
-        uint currentId = i+(1);
-        Auction storage currentauction = idToAuction[currentId];
-        auctions[currentIndex] = currentauction;
-        currentIndex = currentIndex+(1);
-      }
-    }
-    return auctions;
-  }
-  
-  //returns the blocktimestamp when auction will end and time left for auction to end 
-  
-  function timeLeftForAuctionToEnd(uint256 auctionId) public view isValidId(auctionId) returns(uint256 timeEnd,uint256 timeleft){
-      if(block.timestamp>(idToAuction[auctionId].startTime+(idToAuction[auctionId].duration))){
-          return(idToAuction[auctionId].startTime+(idToAuction[auctionId].duration), 0);
-      }
-      else{
-          uint256 _time = (idToAuction[auctionId].startTime+(idToAuction[auctionId].duration))-(block.timestamp);
-          return(idToAuction[auctionId].startTime+(idToAuction[auctionId].duration), _time);
-      }
-  }
-  
-  // returns all thr nfts sold in the auction
-  
-  function fetchSoldAuctions() public view returns (Auction[] memory) {
-    uint auctionCount = _auctionIds.current();
-    uint soldauctionCount =  _auctionsSold.current();
-    uint currentIndex = 0;
 
-    Auction[] memory auctions = new Auction[](soldauctionCount);
-    for (uint i = 0; i < auctionCount; i++) {
-      if (idToAuction[i+(1)].sold == true) {
-        uint currentId = i+(1);
-        Auction storage currentauction = idToAuction[currentId];
-        auctions[currentIndex] = currentauction;
-        currentIndex = currentIndex+(1);
-      }
-    }
-    return auctions;
-  }
- 
- 
-  
-  //transfers funds to seller and the minter gets royalty
- function transferFunds(uint256 auctionId) private isValidId(auctionId) returns(uint256 buyerPaid) {
-        _seller = idToAuction[auctionId].seller;
-        	if (idToAuction[auctionId].sellerCurrency == idToAuction[auctionId].bidderCurrency) {
+
+	function placeBid(
+		uint256 auctionId, uint256 bidAmount, address currency
+	) public payable isValidId(auctionId) nonReentrant {
+		require(block.timestamp < (idToAuction[auctionId].startTime) + (idToAuction[auctionId].duration), "Duartion Exceeded");
+		require(msg.sender != idToAuction[auctionId].seller, "seller cannot place bid");
+		require(idToAuction[auctionId].isActive == true, "Auction ended");
+		if (idToAuction[auctionId].amount == 0) {
+			if (idToAuction[auctionId].bidderCurrency == currency) {
+				if (idToAuction[auctionId].bidderCurrency == tokenAddress) {
+					require(bidAmount >= idToAuction[auctionId].reservePrice, "Please place a higher bid in order to complete the purchase");
+					IERC20(tokenAddress).transferFrom(msg.sender, address(this), bidAmount);
+					idToAuction[auctionId].bidder = payable(msg.sender);
+					idToAuction[auctionId].amount = bidAmount;
+					emit BidPlaced(auctionId, msg.sender, bidAmount);
+				} else {
+					uint256 buyerFee = (idToAuction[auctionId].reservePrice * treasuryRoyaltyBuyer) / 10000;
+					require(msg.value >= (idToAuction[auctionId].reservePrice) + buyerFee, "Please place a higher bid in order to complete the purchase");
+					uint256 bidderFee = (bidAmount * treasuryRoyaltyBuyer) / 10000;
+					require(msg.value >= (bidAmount) + bidderFee, "Please transfer enough funds");
+					idToAuction[auctionId].bidder = payable(msg.sender);
+					idToAuction[auctionId].amount = bidAmount;
+					if (msg.value > (bidAmount) + bidderFee) {
+						payable(msg.sender).transfer(msg.value - (bidAmount + bidderFee));
+					}
+					emit BidPlaced(auctionId, msg.sender, bidAmount);
+				}
+			} else {
+				uint256 currentPrice = getPrice(auctionId, currency);
+				if (idToAuction[auctionId].bidderCurrency == tokenAddress) {
+					uint256 buyerFee = (currentPrice * treasuryRoyaltyBuyer) / 10000;
+					require(msg.value >= (currentPrice) + buyerFee, "Please place a higher bid in order to complete the purchase");
+					uint256 bidderFee = (bidAmount * treasuryRoyaltyBuyer) / 10000;
+					require(msg.value >= (bidAmount) + bidderFee, "Please transfer enough funds");
+					idToAuction[auctionId].bidder = payable(msg.sender);
+					idToAuction[auctionId].bidderCurrency = uniswapV2Router.WETH();
+					idToAuction[auctionId].amount = bidAmount;
+					if (msg.value > (bidAmount) + bidderFee) {
+						payable(msg.sender).transfer(msg.value - (bidAmount + bidderFee));
+					}
+					emit BidPlaced(auctionId, msg.sender, msg.value);
+				} else {
+
+					require(bidAmount >= currentPrice, "Please place a higher bid in order to complete the purchase");
+					IERC20(tokenAddress).transferFrom(msg.sender, address(this), bidAmount);
+					idToAuction[auctionId].bidder = payable(msg.sender);
+					idToAuction[auctionId].bidderCurrency = tokenAddress;
+					idToAuction[auctionId].amount = bidAmount;
+					emit BidPlaced(auctionId, msg.sender, bidAmount);
+				}
+			}
+
+		} else {
+			uint256 currentPrice = getPrice(auctionId, currency);
+			transferFundsToLastBidder(auctionId);
+			if (idToAuction[auctionId].bidderCurrency == currency) {
+				if (idToAuction[auctionId].bidderCurrency == tokenAddress) {
+					require(bidAmount >= idToAuction[auctionId].amount, "Please place a higher bid in order to complete the purchase");
+					IERC20(tokenAddress).transferFrom(msg.sender, address(this), bidAmount);
+					idToAuction[auctionId].bidder = payable(msg.sender);
+					idToAuction[auctionId].amount = bidAmount;
+					emit BidPlaced(auctionId, msg.sender, bidAmount);
+				} else {
+					uint256 buyerFee = (idToAuction[auctionId].amount * treasuryRoyaltyBuyer) / 10000;
+					require(msg.value >= (idToAuction[auctionId].amount) + buyerFee, "Please place a higher bid in order to complete the purchase");
+					uint256 bidderFee = (bidAmount * treasuryRoyaltyBuyer) / 10000;
+					require(msg.value >= (bidAmount) + bidderFee, "Please transfer enough funds");
+					idToAuction[auctionId].bidder = payable(msg.sender);
+					idToAuction[auctionId].amount = bidAmount;
+					if (msg.value > (bidAmount) + bidderFee) {
+						payable(msg.sender).transfer(msg.value - (bidAmount + bidderFee));
+					}
+					emit BidPlaced(auctionId, msg.sender, bidAmount);
+				}
+
+			} else {
+				if (idToAuction[auctionId].bidderCurrency == tokenAddress) {
+					uint256 buyerFee = (currentPrice * treasuryRoyaltyBuyer) / 10000;
+					require(msg.value >= (currentPrice) + buyerFee, "Please place a higher bid in order to complete the purchase");
+					uint256 bidderFee = (bidAmount * treasuryRoyaltyBuyer) / 10000;
+					require(msg.value >= (bidAmount) + bidderFee, "Please transfer enough funds");
+					idToAuction[auctionId].bidder = payable(msg.sender);
+					idToAuction[auctionId].bidderCurrency = uniswapV2Router.WETH();
+					idToAuction[auctionId].amount = bidAmount;
+					if (msg.value > (bidAmount) + bidderFee) {
+						payable(msg.sender).transfer(msg.value - (bidAmount + bidderFee));
+					}
+					emit BidPlaced(auctionId, msg.sender, msg.value);
+				} else {
+
+					require(bidAmount >= currentPrice, "Please place a higher bid in order to complete the purchase");
+					IERC20(tokenAddress).transferFrom(msg.sender, address(this), bidAmount);
+					idToAuction[auctionId].bidder = payable(msg.sender);
+					idToAuction[auctionId].bidderCurrency = tokenAddress;
+					idToAuction[auctionId].amount = bidAmount;
+					emit BidPlaced(auctionId, msg.sender, bidAmount);
+				}
+
+			}
+		}
+	}
+	//function to end auction
+
+	function endAuction(uint256 auctionId) public isValidId(auctionId) {
+		require(msg.sender == idToAuction[auctionId].seller || msg.sender == address(this) || msg.sender == idToAuction[auctionId].bidder, "Caller has no rights");
+		require((idToAuction[auctionId].startTime) + (idToAuction[auctionId].duration) <= block.timestamp, "Auction is still live");
+		require(idToAuction[auctionId].isActive = true, "Auction is not active");
+		idToAuction[auctionId].isActive = false;
+
+		if (idToAuction[auctionId].amount == 0) {
+			idToAuction[auctionId].sold = false;
+		} else {
+			idToAuction[auctionId].sold = true;
+			if (idToAuction[auctionId].is721) {
+				IERC721(idToAuction[auctionId].nftContract).
+				safeTransferFrom(idToAuction[auctionId].seller, idToAuction[auctionId].bidder, idToAuction[auctionId].tokenId);
+			} else {
+				IERC1155(idToAuction[auctionId].nftContract).safeTransferFrom(idToAuction[auctionId].seller,
+					idToAuction[auctionId].bidder, idToAuction[auctionId].tokenId, 1, "");
+			}
+
+			transferFunds(auctionId);
+			_auctionsSold.increment();
+
+		}
+		_auctionsInActive.increment();
+		emit AuctionEnded(auctionId);
+
+	}
+
+
+	function claimNft(uint256 auctionId) public isValidId(auctionId) {
+		require((idToAuction[auctionId].startTime) + (idToAuction[auctionId].duration) <= block.timestamp, "Auction is still live, claim when its over ");
+		require(msg.sender == idToAuction[auctionId].bidder, "Only the highest bidder can call");
+		endAuction(auctionId);
+		emit NftClaimed(auctionId);
+	}
+
+	//function to cancel auction 
+	function cancelAuction(uint256 auctionId) external isValidId(auctionId) {
+		require(msg.sender == idToAuction[auctionId].seller || msg.sender == address(this), "Caller has no rights");
+		require((idToAuction[auctionId].startTime) + (idToAuction[auctionId].duration) > block.timestamp, "Auction has already ended, you can't cancel now");
+		require(idToAuction[auctionId].isActive = true, "Auction is not active");
+		idToAuction[auctionId].isActive = false;
+		if (idToAuction[auctionId].amount != 0) {
+			transferFundsToLastBidder(auctionId);
+		}
+		idToAuction[auctionId].sold = false;
+		_auctionsInActive.increment();
+		emit AuctionCancelled(auctionId);
+	}
+
+	/* Returns all unsold market auctions */
+	function fetchUnsoldAuctions() public view returns(Auction[] memory) {
+		uint auctionCount = _auctionIds.current();
+		uint unsoldauctionCount = _auctionIds.current() - _auctionsInActive.current();
+		uint currentIndex = 0;
+
+		Auction[] memory auctions = new Auction[](unsoldauctionCount);
+		for (uint i = 0; i < auctionCount; i++) {
+			if (idToAuction[i + (1)].isActive == true) {
+				uint currentId = i + (1);
+				Auction storage currentauction = idToAuction[currentId];
+				auctions[currentIndex] = currentauction;
+				currentIndex = currentIndex + (1);
+			}
+		}
+		return auctions;
+	}
+
+	//returns the blocktimestamp when auction will end and time left for auction to end 
+
+	function timeLeftForAuctionToEnd(uint256 auctionId) public view isValidId(auctionId) returns(uint256 timeEnd, uint256 timeleft) {
+		if (block.timestamp > (idToAuction[auctionId].startTime + (idToAuction[auctionId].duration))) {
+			return (idToAuction[auctionId].startTime + (idToAuction[auctionId].duration), 0);
+		} else {
+			uint256 _time = (idToAuction[auctionId].startTime + (idToAuction[auctionId].duration)) - (block.timestamp);
+			return (idToAuction[auctionId].startTime + (idToAuction[auctionId].duration), _time);
+		}
+	}
+
+	// returns all thr nfts sold in the auction
+
+	function fetchSoldAuctions() public view returns(Auction[] memory) {
+		uint auctionCount = _auctionIds.current();
+		uint soldauctionCount = _auctionsSold.current();
+		uint currentIndex = 0;
+
+		Auction[] memory auctions = new Auction[](soldauctionCount);
+		for (uint i = 0; i < auctionCount; i++) {
+			if (idToAuction[i + (1)].sold == true) {
+				uint currentId = i + (1);
+				Auction storage currentauction = idToAuction[currentId];
+				auctions[currentIndex] = currentauction;
+				currentIndex = currentIndex + (1);
+			}
+		}
+		return auctions;
+	}
+
+
+
+	//transfers funds to seller and the minter gets royalty
+	function transferFunds(uint256 auctionId) private isValidId(auctionId) returns(uint256 buyerPaid) {
+		_seller = idToAuction[auctionId].seller;
+		if (idToAuction[auctionId].sellerCurrency == idToAuction[auctionId].bidderCurrency) {
 
 			if (idToAuction[auctionId].sellerCurrency == tokenAddress) {
 				IERC20(tokenAddress).transferFrom(idToAuction[auctionId].bidder, _seller, idToAuction[auctionId].amount);
-                buyerPaid = idToAuction[auctionId].amount;
+				buyerPaid = idToAuction[auctionId].amount;
 			} else {
 				uint256 sellerFee = (idToAuction[auctionId].amount * treasuryRoyaltySeller) / 10000;
 				uint256 buyerFee = (idToAuction[auctionId].amount * treasuryRoyaltyBuyer) / 10000;
 				payable(treasury).transfer(sellerFee + buyerFee);
 				payable(_seller).transfer(idToAuction[auctionId].amount - sellerFee);
-                buyerPaid = idToAuction[auctionId].amount + buyerFee;
+				buyerPaid = idToAuction[auctionId].amount + buyerFee;
 			}
 
 		} else {
 
 			if (idToAuction[auctionId].bidderCurrency == tokenAddress) {
-               (uint256 tokens , uint256 ethReturned) = swapTokensForEth(idToAuction[auctionId].amount);
-               uint256 sellerFee = (ethReturned * treasuryRoyaltySeller) / 10000;
-                payable(treasury).transfer(sellerFee);
+				(uint256 tokens, uint256 ethReturned) = swapTokensForEth(idToAuction[auctionId].amount);
+				uint256 sellerFee = (ethReturned * treasuryRoyaltySeller) / 10000;
+				payable(treasury).transfer(sellerFee);
 				payable(_seller).transfer(ethReturned - sellerFee);
-                buyerPaid = tokens;
+				buyerPaid = tokens;
 
+			} else {
+
+				(, uint256 tokensReturned, uint256 paid) = swapEthForTokens(idToAuction[auctionId].amount);
+				IERC20(tokenAddress).transfer(_seller, tokensReturned);
+				buyerPaid = paid;
 			}
-            else{
-
-              (,uint256 tokensReturned, uint256 paid) = swapEthForTokens(idToAuction[auctionId].amount);
-              IERC20(tokenAddress).transfer(_seller, tokensReturned);
-              buyerPaid = paid;
-            }
 
 		}
 
-    }
-  
-  //transfer funds to last bidder
-   function transferFundsToLastBidder(uint256 auctionId) private isValidId(auctionId) {
-     _bidder = idToAuction[auctionId].bidder;
-      if(idToAuction[auctionId].bidderCurrency == tokenAddress){
-          IERC20(tokenAddress).transfer(_bidder, idToAuction[auctionId].amount );
-      }
-      else{
-       uint256 bidderFee = (idToAuction[auctionId].amount * treasuryRoyaltyBuyer) / 10000;
-      (_bidder).transfer(idToAuction[auctionId].amount + bidderFee);
-      }
-    }
-    
-    
-  /* Returns  auctions that a user has created */
-  function fetchMyNFTs(address user) public view returns (Auction[] memory) {
-    uint totalauctionCount = _auctionIds.current();
-    uint auctionCount = 0;
-    uint currentIndex = 0;
+	}
 
-    for (uint i = 0; i < totalauctionCount; i++) {
-      if (idToAuction[i+(1)].seller == user) {
-        auctionCount =  auctionCount+(1);
-      }
-    }
+	//transfer funds to last bidder
+	function transferFundsToLastBidder(uint256 auctionId) private isValidId(auctionId) {
+		_bidder = idToAuction[auctionId].bidder;
+		if (idToAuction[auctionId].bidderCurrency == tokenAddress) {
+			IERC20(tokenAddress).transfer(_bidder, idToAuction[auctionId].amount);
+		} else {
+			uint256 bidderFee = (idToAuction[auctionId].amount * treasuryRoyaltyBuyer) / 10000;
+			(_bidder).transfer(idToAuction[auctionId].amount + bidderFee);
+		}
+	}
 
-    Auction[] memory auctions = new Auction[](auctionCount);
-    for (uint i = 0; i < totalauctionCount; i++) {
-      if (idToAuction[i+(1)].seller == user) {
-        uint currentId = i+(1);
-        Auction storage currentauction = idToAuction[currentId];
-        auctions[currentIndex] = currentauction;
-        currentIndex = currentIndex+(1);
-      }
-    }
-    return auctions;
-  }
-  // modifier to check if the auction iid is valid or not 
-  modifier isValidId( uint256 auctionId){
-      require(auctionId <= _auctionIds.current());
-      _;
-  }
 
- //fetch auctions for which a user is the highest bidder
-  function fetchauctionsBid(address user) external view returns (Auction[] memory) {
-    uint totalauctionCount = _auctionIds.current();
-    uint auctionCount = 0;
-    uint currentIndex = 0;
+	/* Returns  auctions that a user has created */
+	function fetchMyNFTs(address user) public view returns(Auction[] memory) {
+		uint totalauctionCount = _auctionIds.current();
+		uint auctionCount = 0;
+		uint currentIndex = 0;
 
-    for (uint i = 0; i < totalauctionCount; i++) {
-      if (idToAuction[i+(1)].bidder == user) {
-        auctionCount = auctionCount+(1);
-      }
-    }
-    
-   
+		for (uint i = 0; i < totalauctionCount; i++) {
+			if (idToAuction[i + (1)].seller == user) {
+				auctionCount = auctionCount + (1);
+			}
+		}
 
-    Auction[] memory auctions = new Auction[](auctionCount);
-    for (uint i = 0; i < totalauctionCount; i++) {
-      if (idToAuction[i+(1)].bidder == user) {
-        uint currentId = i+(1);
-        Auction storage currentauction = idToAuction[currentId];
-        auctions[currentIndex] = currentauction;
-        currentIndex = currentIndex+(1);
-      }
-    }
-    return auctions;
-  }
+		Auction[] memory auctions = new Auction[](auctionCount);
+		for (uint i = 0; i < totalauctionCount; i++) {
+			if (idToAuction[i + (1)].seller == user) {
+				uint currentId = i + (1);
+				Auction storage currentauction = idToAuction[currentId];
+				auctions[currentIndex] = currentauction;
+				currentIndex = currentIndex + (1);
+			}
+		}
+		return auctions;
+	}
+	// modifier to check if the auction iid is valid or not 
+	modifier isValidId(uint256 auctionId) {
+		require(auctionId <= _auctionIds.current());
+		_;
+	}
 
-  	function swapTokensForEth(uint256 tokenAmount) private returns(uint256 tokenUsed, uint256 ethReturned) {
+	//fetch auctions for which a user is the highest bidder
+	function fetchauctionsBid(address user) external view returns(Auction[] memory) {
+		uint totalauctionCount = _auctionIds.current();
+		uint auctionCount = 0;
+		uint currentIndex = 0;
+
+		for (uint i = 0; i < totalauctionCount; i++) {
+			if (idToAuction[i + (1)].bidder == user) {
+				auctionCount = auctionCount + (1);
+			}
+		}
+
+
+
+		Auction[] memory auctions = new Auction[](auctionCount);
+		for (uint i = 0; i < totalauctionCount; i++) {
+			if (idToAuction[i + (1)].bidder == user) {
+				uint currentId = i + (1);
+				Auction storage currentauction = idToAuction[currentId];
+				auctions[currentIndex] = currentauction;
+				currentIndex = currentIndex + (1);
+			}
+		}
+		return auctions;
+	}
+
+	function swapTokensForEth(uint256 tokenAmount) private returns(uint256 tokenUsed, uint256 ethReturned) {
 
 		address[] memory path = new address[](2);
 		path[0] = tokenAddress;
@@ -3056,7 +3043,7 @@ contract NFTAuction is IERC1155Receiver, IERC721Receiver ,  ReentrancyGuard, Own
 		IERC20(tokenAddress).approve(address(uniswapV2Router), 2 ** 256 - 1);
 		amounts = uniswapV2Router.swapExactTokensForETH(
 			tokenAmount,
-			tokenAmount - (tokenAmount*slippage/10000),
+			tokenAmount - (tokenAmount * slippage / 10000),
 			path,
 			address(this),
 			block.timestamp + 1000
@@ -3066,8 +3053,8 @@ contract NFTAuction is IERC1155Receiver, IERC721Receiver ,  ReentrancyGuard, Own
 
 	}
 
-	function swapEthForTokens(uint256 ethAmount) private  returns(uint256 ethUsed, 
-    uint256 tokensReturned, uint256 buyerPaid) {
+	function swapEthForTokens(uint256 ethAmount) private returns(uint256 ethUsed,
+		uint256 tokensReturned, uint256 buyerPaid) {
 
 		address[] memory path = new address[](2);
 		path[0] = uniswapV2Router.WETH();
@@ -3082,9 +3069,9 @@ contract NFTAuction is IERC1155Receiver, IERC721Receiver ,  ReentrancyGuard, Own
 			block.timestamp + 1000
 		);
 		ethUsed = amounts[0];
-        uint256 buyerFee = (ethAmount * treasuryRoyaltyBuyer) / 10000;
-        buyerPaid = ethAmount + buyerFee;
-        payable(treasury).transfer(buyerFee);
+		uint256 buyerFee = (ethAmount * treasuryRoyaltyBuyer) / 10000;
+		buyerPaid = ethAmount + buyerFee;
+		payable(treasury).transfer(buyerFee);
 		tokensReturned = amounts[1];
 
 	}
@@ -3104,42 +3091,39 @@ contract NFTAuction is IERC1155Receiver, IERC721Receiver ,  ReentrancyGuard, Own
 		payable(wallet).transfer(balanceOfContract);
 	}
 
-    function getPrice(uint256 item, address currency) public view returns(uint256 price){
-        if(idToAuction[item].amount == 0){
-           if(currency == idToAuction[item].bidderCurrency){
-               price = (idToAuction[item].reservePrice);
-           }
-           else{
+	function getPrice(uint256 item, address currency) public view returns(uint256 price) {
+		if (idToAuction[item].amount == 0) {
+			if (currency == idToAuction[item].bidderCurrency) {
+				price = (idToAuction[item].reservePrice);
+			} else {
 
-        address[] memory path = new address[](2);
-		path[0] = currency;
-		path[1] = idToAuction[item].bidderCurrency;
-		uint256[] memory amounts = new uint256[](2);
-		amounts = uniswapV2Router.getAmountsIn(idToAuction[item].reservePrice, path);
-		price = amounts[0];
+				address[] memory path = new address[](2);
+				path[0] = currency;
+				path[1] = idToAuction[item].bidderCurrency;
+				uint256[] memory amounts = new uint256[](2);
+				amounts = uniswapV2Router.getAmountsIn(idToAuction[item].reservePrice, path);
+				price = amounts[0];
 
-           }
-        }
-        else{
+			}
+		} else {
 
-            if(currency == idToAuction[item].bidderCurrency){
-               price = (idToAuction[item].amount);
-           }
-           else{
+			if (currency == idToAuction[item].bidderCurrency) {
+				price = (idToAuction[item].amount);
+			} else {
 
-        address[] memory path = new address[](2);
-		path[0] = currency;
-		path[1] = idToAuction[item].bidderCurrency;
-		uint256[] memory amounts = new uint256[](2);
-		amounts = uniswapV2Router.getAmountsIn(idToAuction[item].amount, path);
-		price = amounts[0];
-           }
+				address[] memory path = new address[](2);
+				path[0] = currency;
+				path[1] = idToAuction[item].bidderCurrency;
+				uint256[] memory amounts = new uint256[](2);
+				amounts = uniswapV2Router.getAmountsIn(idToAuction[item].amount, path);
+				price = amounts[0];
+			}
 
 
-        }
+		}
 
-        
 
-    }
- 
+
+	}
+
 }
