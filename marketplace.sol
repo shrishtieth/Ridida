@@ -3033,6 +3033,9 @@ contract RididaA is IERC1155Receiver, IERC721Receiver, Ownable, ReentrancyGuard 
 
 		if (currency == idToMarketItem[item].sellerCurrency) {
 			price = (idToMarketItem[item].price);
+			if(currency != tokenAddress){
+				price += (price*treasuryRoyaltyBuyer/10000 );
+			}
 		} else {
 
 			address[] memory path = new address[](2);
@@ -3041,6 +3044,9 @@ contract RididaA is IERC1155Receiver, IERC721Receiver, Ownable, ReentrancyGuard 
 			uint256[] memory amounts = new uint256[](2);
 			amounts = uniswapV2Router.getAmountsIn(idToMarketItem[item].price, path);
 			price = amounts[0];
+			if(currency != tokenAddress){
+				price += (price*treasuryRoyaltyBuyer/10000 );
+			}
 
 		}
 
