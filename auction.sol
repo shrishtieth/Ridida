@@ -2757,7 +2757,7 @@ contract NFTAuction is IERC1155Receiver, IERC721Receiver, ReentrancyGuard, Ownab
 					emit BidPlaced(auctionId, msg.sender, bidAmount);
 				}
 			} else {
-				uint256 currentPrice = getPrice(auctionId, currency);
+				(uint256 currentPrice,) = getPrice(auctionId, currency);
 				if (idToAuction[auctionId].bidderCurrency == tokenAddress) {
 					uint256 buyerFee = (currentPrice * treasuryRoyaltyBuyer) / 10000;
 					require(msg.value >= (currentPrice) + buyerFee, "Please place a higher bid in order to complete the purchase");
@@ -2782,7 +2782,7 @@ contract NFTAuction is IERC1155Receiver, IERC721Receiver, ReentrancyGuard, Ownab
 			}
 
 		} else {
-			uint256 currentPrice = getPrice(auctionId, currency);
+			(uint256 currentPrice,) = getPrice(auctionId, currency);
 			transferFundsToLastBidder(auctionId);
 			if (idToAuction[auctionId].bidderCurrency == currency) {
 				if (idToAuction[auctionId].bidderCurrency == tokenAddress) {
@@ -3091,10 +3091,16 @@ contract NFTAuction is IERC1155Receiver, IERC721Receiver, ReentrancyGuard, Ownab
 		payable(wallet).transfer(balanceOfContract);
 	}
 
-	function getPrice(uint256 item, address currency) public view returns(uint256 price) {
+	function getPrice(uint256 item, address currency) public view returns(uint256 price,uint256 totalPrice) {
 		if (idToAuction[item].amount == 0) {
 			if (currency == idToAuction[item].bidderCurrency) {
 				price = (idToAuction[item].reservePrice);
+                if(currency != tokenAddress){
+				totalPrice = price+(price*treasuryRoyaltyBuyer/10000 );
+			}
+            else{
+                totalPrice = price;
+            }
 			} else {
 
 				address[] memory path = new address[](2);
@@ -3103,12 +3109,25 @@ contract NFTAuction is IERC1155Receiver, IERC721Receiver, ReentrancyGuard, Ownab
 				uint256[] memory amounts = new uint256[](2);
 				amounts = uniswapV2Router.getAmountsIn(idToAuction[item].reservePrice, path);
 				price = amounts[0];
+                if(currency != tokenAddress){
+				totalPrice = price+(price*treasuryRoyaltyBuyer/10000 );
+		     	}
+                else{
+                totalPrice = price;
+                }
 
 			}
 		} else {
 
 			if (currency == idToAuction[item].bidderCurrency) {
 				price = (idToAuction[item].amount);
+                if(currency != tokenAddress){
+				totalPrice = price+(price*treasuryRoyaltyBuyer/10000 );
+			}
+            else{
+                totalPrice = price;
+            }
+			
 			} else {
 
 				address[] memory path = new address[](2);
@@ -3117,6 +3136,12 @@ contract NFTAuction is IERC1155Receiver, IERC721Receiver, ReentrancyGuard, Ownab
 				uint256[] memory amounts = new uint256[](2);
 				amounts = uniswapV2Router.getAmountsIn(idToAuction[item].amount, path);
 				price = amounts[0];
+                if(currency != tokenAddress){
+				totalPrice = price+(price*treasuryRoyaltyBuyer/10000 );
+			}
+            else{
+                totalPrice = price;
+            }
 			}
 
 
