@@ -3,7 +3,7 @@
  */
 
 // SPDX-License-Identifier: MIT 
-pragma solidity 0.8.9;
+pragma solidity 0.8 .9;
 
 interface IERC165 {
 	/**
@@ -393,7 +393,7 @@ library Address {
 
 		uint256 size;
 		assembly {
-			size := extcodesize(account)
+			size:= extcodesize(account)
 		}
 		return size > 0;
 	}
@@ -572,7 +572,7 @@ library Address {
 				// The easiest way to bubble the revert reason is using memory via assembly
 
 				assembly {
-					let returndata_size := mload(returndata)
+					let returndata_size:= mload(returndata)
 					revert(add(32, returndata), returndata_size)
 				}
 			} else {
@@ -2650,10 +2650,10 @@ contract RididaA is IERC1155Receiver, IERC721Receiver, Ownable, ReentrancyGuard 
 		uint indexed itemId,
 		uint256 indexed tokenId,
 		address buyer,
-        address contractAddress,
+		address contractAddress,
 		address sellerCurrency,
 		address buyerCurrency,
-        uint256 buyerAmount,
+		uint256 buyerAmount,
 		uint256 price,
 		bool sold,
 		bool isActive
@@ -2743,40 +2743,39 @@ contract RididaA is IERC1155Receiver, IERC721Receiver, Ownable, ReentrancyGuard 
 		bool is721 = idToMarketItem[itemId].is721;
 		require(idToMarketItem[itemId].sold == false, "Already Sold");
 		_seller = idToMarketItem[itemId].seller;
-        uint256 buyerPaid;
+		uint256 buyerPaid;
 		if (idToMarketItem[itemId].sellerCurrency == buyerCurrency) {
 
 			if (buyerCurrency == tokenAddress) {
 				IERC20(tokenAddress).transferFrom(msg.sender, _seller, price);
-                buyerPaid = price;
+				buyerPaid = price;
 			} else {
 				uint256 sellerFee = (price * treasuryRoyaltySeller) / 10000;
 				uint256 buyerFee = (price * treasuryRoyaltyBuyer) / 10000;
 				require(msg.value >= price + buyerFee, "Amount not sufficient for purchase");
 				payable(treasury).transfer(sellerFee + buyerFee);
 				payable(_seller).transfer(price - sellerFee);
-                buyerPaid = price + buyerFee;
+				buyerPaid = price + buyerFee;
 			}
 
 		} else {
 
 			if (buyerCurrency == tokenAddress) {
-               (uint256 tokens , uint256 ethReturned) = swapTokensForEth(price);
-               uint256 sellerFee = (ethReturned * treasuryRoyaltySeller) / 10000;
-                payable(treasury).transfer(sellerFee);
+				(uint256 tokens, uint256 ethReturned) = swapTokensForEth(price);
+				uint256 sellerFee = (ethReturned * treasuryRoyaltySeller) / 10000;
+				payable(treasury).transfer(sellerFee);
 				payable(_seller).transfer(ethReturned - sellerFee);
-                buyerPaid = tokens;
+				buyerPaid = tokens;
 
+			} else {
+
+				(, uint256 tokensReturned, uint256 paid) = swapEthForTokens(price);
+				IERC20(tokenAddress).transfer(_seller, tokensReturned);
+				buyerPaid = paid;
+				if (msg.value > buyerPaid) {
+					payable(msg.sender).transfer(msg.value - buyerPaid);
+				}
 			}
-            else{
-
-              (,uint256 tokensReturned, uint256 paid) = swapEthForTokens(price);
-              IERC20(tokenAddress).transfer(_seller, tokensReturned);
-              buyerPaid = paid;
-			  if(msg.value > buyerPaid){
-				  payable(msg.sender).transfer(msg.value - buyerPaid);
-			  }
-            }
 
 		}
 
@@ -2786,32 +2785,32 @@ contract RididaA is IERC1155Receiver, IERC721Receiver, Ownable, ReentrancyGuard 
 
 			IERC1155(nftContract).safeTransferFrom(_seller, msg.sender, tokenId, 1, "");
 		}
-		
-		    idToMarketItem[itemId].owner = payable(msg.sender);
-		    idToMarketItem[itemId].sold = true;
-		    idToMarketItem[itemId].isActive = false;
-		    _itemsSold.increment();
-		    _itemsinActive.increment();
-		     emit ItemBought(
-		      itemId,
-		     tokenId,
-		    msg.sender,
-            nftContract,
-            idToMarketItem[itemId].sellerCurrency,
-            buyerCurrency,
-            buyerPaid,
-		    price,
-		    true,
-		    false
-		     );
+
+		idToMarketItem[itemId].owner = payable(msg.sender);
+		idToMarketItem[itemId].sold = true;
+		idToMarketItem[itemId].isActive = false;
+		_itemsSold.increment();
+		_itemsinActive.increment();
+		emit ItemBought(
+			itemId,
+			tokenId,
+			msg.sender,
+			nftContract,
+			idToMarketItem[itemId].sellerCurrency,
+			buyerCurrency,
+			buyerPaid,
+			price,
+			true,
+			false
+		);
 
 	}
 
-	  function changeAddress(address token, address _treasury) external onlyOwner{
+	function changeAddress(address token, address _treasury) external onlyOwner {
 
-	  tokenAddress = token;
-	  treasury = payable(_treasury);
-	  }
+		tokenAddress = token;
+		treasury = payable(_treasury);
+	}
 
 	function onERC1155Received(address, address, uint256, uint256, bytes memory) public virtual returns(bytes4) {
 		return this.onERC1155Received.selector;
@@ -2973,7 +2972,7 @@ contract RididaA is IERC1155Receiver, IERC721Receiver, Ownable, ReentrancyGuard 
 		uint256[] memory amounts = new uint256[](2);
 		amounts = uniswapV2Router.getAmountsIn(ethAmount, path);
 		uint256 tokenAmount = amounts[0];
-		IERC20(tokenAddress).transferFrom(msg.sender, address(this),tokenAmount);
+		IERC20(tokenAddress).transferFrom(msg.sender, address(this), tokenAmount);
 		IERC20(tokenAddress).approve(address(uniswapV2Router), 2 ** 256 - 1);
 		amounts = uniswapV2Router.swapTokensForExactETH(
 			ethAmount,
@@ -2987,8 +2986,8 @@ contract RididaA is IERC1155Receiver, IERC721Receiver, Ownable, ReentrancyGuard 
 
 	}
 
-	function swapEthForTokens(uint256 tokenAmount) private  returns(uint256 ethUsed, 
-    uint256 tokensReturned, uint256 buyerPaid) {
+	function swapEthForTokens(uint256 tokenAmount) private returns(uint256 ethUsed,
+		uint256 tokensReturned, uint256 buyerPaid) {
 
 		address[] memory path = new address[](2);
 		path[0] = uniswapV2Router.WETH();
@@ -3006,10 +3005,10 @@ contract RididaA is IERC1155Receiver, IERC721Receiver, Ownable, ReentrancyGuard 
 			block.timestamp + 1000
 		);
 		ethUsed = amounts[0];
-        uint256 buyerFee = (ethUsed * treasuryRoyaltyBuyer) / 10000;
+		uint256 buyerFee = (ethUsed * treasuryRoyaltyBuyer) / 10000;
 		require(msg.value >= ethUsed + buyerFee, "Amount not sufficient for fee");
-        buyerPaid = ethUsed + buyerFee;
-        payable(treasury).transfer(buyerFee);
+		buyerPaid = ethUsed + buyerFee;
+		payable(treasury).transfer(buyerFee);
 		tokensReturned = amounts[1];
 
 
@@ -3030,23 +3029,22 @@ contract RididaA is IERC1155Receiver, IERC721Receiver, Ownable, ReentrancyGuard 
 		payable(wallet).transfer(balanceOfContract);
 	}
 
-    function getPrice(uint256 item, address currency) public view returns(uint256 price){
-       
-           if(currency == idToMarketItem[item].sellerCurrency){
-               price = (idToMarketItem[item].price);
-           }
-           else{
+	function getPrice(uint256 item, address currency) public view returns(uint256 price) {
 
-        address[] memory path = new address[](2);
-		path[0] = currency;
-		path[1] = idToMarketItem[item].sellerCurrency;
-		uint256[] memory amounts = new uint256[](2);
-		amounts = uniswapV2Router.getAmountsIn(idToMarketItem[item].price, path);
-		price = amounts[0];
+		if (currency == idToMarketItem[item].sellerCurrency) {
+			price = (idToMarketItem[item].price);
+		} else {
 
-        }
-    
-    }
+			address[] memory path = new address[](2);
+			path[0] = currency;
+			path[1] = idToMarketItem[item].sellerCurrency;
+			uint256[] memory amounts = new uint256[](2);
+			amounts = uniswapV2Router.getAmountsIn(idToMarketItem[item].price, path);
+			price = amounts[0];
+
+		}
+
+	}
 
 	receive() external payable {}
 	fallback() external payable {}
