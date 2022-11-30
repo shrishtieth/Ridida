@@ -3,7 +3,7 @@
  */
 
 // SPDX-License-Identifier: MIT 
-pragma solidity 0.8 .9;
+pragma solidity 0.8.9;
 
 interface IERC165 {
 	/**
@@ -2602,10 +2602,9 @@ contract RididaA is IERC1155Receiver, IERC721Receiver, Ownable, ReentrancyGuard 
 		treasury = payable(_treasury);
 		pairContract = IUniswapV2Pair(pair);
 		IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
-			0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
+			0xD99D1c33F9fC3444f8101754aBC46c52416550D1
 		);
 		uniswapV2Router = _uniswapV2Router;
-		IERC20(tokenAddress).approve(address(uniswapV2Router), 2 ** 256 - 1);
 	}
 
 	//struct for each market item
@@ -2772,8 +2771,11 @@ contract RididaA is IERC1155Receiver, IERC721Receiver, Ownable, ReentrancyGuard 
             else{
 
               (,uint256 tokensReturned, uint256 paid) = swapEthForTokens(price);
-              IERC20(tokenAddress).transferFrom(address(this),_seller, tokensReturned);
+              IERC20(tokenAddress).transfer(_seller, tokensReturned);
               buyerPaid = paid;
+			  if(msg.value > buyerPaid){
+				  payable(msg.sender).transfer(msg.value - buyerPaid);
+			  }
             }
 
 		}
@@ -2963,7 +2965,7 @@ contract RididaA is IERC1155Receiver, IERC721Receiver, Ownable, ReentrancyGuard 
 		return items;
 	}
 
-	function swapTokensForEth(uint256 ethAmount) private nonReentrant returns(uint256 tokenUsed, uint256 ethReturned) {
+	function swapTokensForEth(uint256 ethAmount) private returns(uint256 tokenUsed, uint256 ethReturned) {
 
 		address[] memory path = new address[](2);
 		path[0] = tokenAddress;
@@ -2971,6 +2973,8 @@ contract RididaA is IERC1155Receiver, IERC721Receiver, Ownable, ReentrancyGuard 
 		uint256[] memory amounts = new uint256[](2);
 		amounts = uniswapV2Router.getAmountsIn(ethAmount, path);
 		uint256 tokenAmount = amounts[0];
+		IERC20(tokenAddress).transferFrom(msg.sender, address(this),tokenAmount);
+		IERC20(tokenAddress).approve(address(uniswapV2Router), 2 ** 256 - 1);
 		amounts = uniswapV2Router.swapTokensForExactETH(
 			ethAmount,
 			tokenAmount,
@@ -2983,7 +2987,7 @@ contract RididaA is IERC1155Receiver, IERC721Receiver, Ownable, ReentrancyGuard 
 
 	}
 
-	function swapEthForTokens(uint256 tokenAmount) private nonReentrant returns(uint256 ethUsed, 
+	function swapEthForTokens(uint256 tokenAmount) private  returns(uint256 ethUsed, 
     uint256 tokensReturned, uint256 buyerPaid) {
 
 		address[] memory path = new address[](2);
@@ -3026,6 +3030,23 @@ contract RididaA is IERC1155Receiver, IERC721Receiver, Ownable, ReentrancyGuard 
 		payable(wallet).transfer(balanceOfContract);
 	}
 
+    function getPrice(uint256 item, address currency) public view returns(uint256 price){
+       
+           if(currency == idToMarketItem[item].sellerCurrency){
+               price = (idToMarketItem[item].price);
+           }
+           else{
+
+        address[] memory path = new address[](2);
+		path[0] = currency;
+		path[1] = idToMarketItem[item].sellerCurrency;
+		uint256[] memory amounts = new uint256[](2);
+		amounts = uniswapV2Router.getAmountsIn(idToMarketItem[item].price, path);
+		price = amounts[0];
+
+        }
+    
+    }
 
 	receive() external payable {}
 	fallback() external payable {}
