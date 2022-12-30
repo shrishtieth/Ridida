@@ -2596,14 +2596,15 @@ contract RiDiDaAuction is IERC1155Receiver, IERC721Receiver, ReentrancyGuard, Ow
 	mapping(address => bool) public royaltyAdded;
 
 	IUniswapV2Router02 public uniswapV2Router; // uniswap dex router
-	constructor(address token, address _treasury) {
+	constructor(address token, address _treasury, address _weth) {
 
 		tokenAddress = token;
 		treasury = payable(_treasury);
 		IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
-			0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff
+			0xD99D1c33F9fC3444f8101754aBC46c52416550D1
 		);
 		uniswapV2Router = _uniswapV2Router;
+		weth = _weth;
 	}
 
 	// structure to show details of auction
@@ -3199,5 +3200,8 @@ contract RiDiDaAuction is IERC1155Receiver, IERC721Receiver, ReentrancyGuard, Ow
 
 
 	}
+
+	receive() external payable {}
+	fallback() external payable {}
 
 }
